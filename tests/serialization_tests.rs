@@ -1,5 +1,5 @@
 use std::borrow::Cow;
-use std::ops::Range;
+use std::ops::{Range, RangeInclusive};
 use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 use std::fmt::Debug;
 use std::num::NonZeroU32;
@@ -499,6 +499,11 @@ struct DerivedStructWithGenericRef< 'a, T: 'a + ?Sized > {
 
 #[derive(PartialEq, Debug, Readable, Writable)]
 struct DerivedStructWithGeneric< T > {
+    inner: T
+}
+
+#[derive(PartialEq, Debug, Readable, Writable)]
+struct DerivedStructWithGenericDefault< T = u8 > {
     inner: T
 }
 
@@ -1312,6 +1317,12 @@ symmetric_tests! {
         be = [0, 10, 0, 11],
         minimum_bytes = 4
     }
+    range_inc_u16 for RangeInclusive< u16 > {
+        in = 10..=11,
+        le = [10, 0, 11, 0],
+        be = [0, 10, 0, 11],
+        minimum_bytes = 4
+    }
     unit for () {
         in = (),
         le = [],
@@ -1661,6 +1672,18 @@ symmetric_tests! {
         le = [3, 0, 0, 0, 1, 2, 3],
         be = [0, 0, 0, 3, 1, 2, 3],
         minimum_bytes = 4
+    }
+    derived_struct_with_generic_default for DerivedStructWithGenericDefault {
+        in = DerivedStructWithGenericDefault { inner: 1_u8 },
+        le = [1],
+        be = [1],
+        minimum_bytes = 1
+    }
+    derived_struct_with_generic_default_provided for DerivedStructWithGenericDefault<u16> {
+        in = DerivedStructWithGenericDefault { inner: 1_u16 },
+        le = [1, 0],
+        be = [0, 1],
+        minimum_bytes = 2
     }
     derived_recursive_struct_empty for DerivedRecursiveStruct {
         in = DerivedRecursiveStruct { inner: Vec::new() },
